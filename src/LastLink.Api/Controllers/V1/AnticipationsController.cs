@@ -35,13 +35,13 @@ namespace LastLink.Api.Controllers.V1
             if (!list.IsSuccess)
                 return GetResultByErrorMessage(list.Errors);
 
-            return Created(string.Empty, list.Value);
+            return Ok(list.Value);
         }
 
         [HttpGet("simulate")]
         public IActionResult Simulate([FromQuery] string creatorId, [FromQuery] decimal valorSolicitado)
         {
-            var result = _service.Simulate(valorSolicitado, creatorId);
+            var result = _service.Simulate(creatorId, valorSolicitado);
             if (!result.IsSuccess)
                 return GetResultByErrorMessage(result.Errors);
 

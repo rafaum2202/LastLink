@@ -6,6 +6,7 @@ using LastLink.Domain.Errors;
 using LastLink.Domain.Models.Dtos;
 using LastLink.Domain.Models.Requests;
 using LastLink.Domain.Utils;
+using System;
 
 namespace LastLink.Application.Services
 {
@@ -46,7 +47,7 @@ namespace LastLink.Application.Services
             return Result.Ok(items);
         }
 
-        public Result<AnticipationDto> Simulate(decimal valorSolicitado, string creatorId)
+        public Result<AnticipationDto> Simulate(string creatorId, decimal valorSolicitado)
         {
             if (valorSolicitado <= MIN_VALUE)
                 return Result.Fail(ErrorMessages.VALOR_SOLICITADO_INVALIDO);
