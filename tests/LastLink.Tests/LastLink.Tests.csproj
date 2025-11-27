@@ -25,6 +25,7 @@
     <ProjectReference Include="..\..\src\LastLink.Api\LastLink.Api.csproj" />
     <ProjectReference Include="..\..\src\LastLink.Application\LastLink.Application.csproj" />
     <ProjectReference Include="..\..\src\LastLink.Domain\LastLink.Domain.csproj" />
+    <ProjectReference Include="..\..\src\LastLink.Infra\LastLink.Infra.csproj" />
   </ItemGroup>
 
 </Project>

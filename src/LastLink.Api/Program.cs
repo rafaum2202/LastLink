@@ -1,6 +1,6 @@
-using Asp.Versioning;
 using Asp.Versioning.ApiExplorer;
 using LastLink.Api.Extensions;
+using LastLink.Infra.Extensions;
 using System.Text.Json.Serialization;
 
 namespace LastLink.Api

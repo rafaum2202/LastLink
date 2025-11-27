@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\LastLink.Application\LastLink.Application.csproj" />
+    <ProjectReference Include="..\LastLink.Domain\LastLink.Domain.csproj" />
     <ProjectReference Include="..\LastLink.Infra\LastLink.Infra.csproj" />
   </ItemGroup>
 

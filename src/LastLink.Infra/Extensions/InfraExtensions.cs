@@ -2,8 +2,9 @@
 using LastLink.Infra.Data;
 using LastLink.Infra.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace LastLink.Api.Extensions
+namespace LastLink.Infra.Extensions
 {
     public static class InfraExtensions
     {
