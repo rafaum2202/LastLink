@@ -1,5 +1,4 @@
-﻿
-using Asp.Versioning;
+﻿using Asp.Versioning;
 using LastLink.Api.Configurations;
 
 namespace LastLink.Api.Extensions

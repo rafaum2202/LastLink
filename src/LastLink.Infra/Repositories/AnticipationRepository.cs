@@ -31,7 +31,7 @@ namespace LastLink.Infra.Repositories
                                              .ToListAsync();
 
         public async Task<bool> HasPendingForCreatorAsync(string creatorId)
-            => await _db.AnticipationRequests.AnyAsync(x => x.CreatorId == creatorId && x.Status == AntecipationStatusEnum.Pendente);
+            => await _db.AnticipationRequests.AnyAsync(x => x.CreatorId == creatorId && x.Status == AnticipationStatusEnum.Pendente);
 
         public async Task SaveChangesAsync()
             => await _db.SaveChangesAsync();

@@ -17,7 +17,6 @@ namespace LastLink.Api.Controllers
             if (error.Any(e => NotFoundErrors.Contains(e.Message)))
                 return NotFound(error);
 
-
             return BadRequest(error);
         }
     }

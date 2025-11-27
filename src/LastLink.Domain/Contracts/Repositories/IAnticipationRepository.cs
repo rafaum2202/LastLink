@@ -1,11 +1,4 @@
-﻿using FluentResults;
-using LastLink.Domain.Models.Dtos;
-using LastLink.Domain.Models.Requests;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using LastLink.Domain.Models.Dtos;
 
 namespace LastLink.Domain.Contracts.Repositories
 {

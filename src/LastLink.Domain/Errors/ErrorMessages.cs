@@ -10,5 +10,6 @@ namespace LastLink.Domain.Errors
         public static readonly Error CREATOR_SEM_SOLICITACOES = new("Creator sem solicitações!");
         public static readonly Error STATUS_INVALIDO = new("Status informado é inválido");
         public static readonly Error SOLICITACAO_NAO_ENCONTRADA = new("Solicitação não encontrada!");
+        public static readonly Error SOLICITACAO_FINALIZADA = new("Solicitação já se encontra finalizada!");
     }
 }

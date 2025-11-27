@@ -5,11 +5,13 @@ using LastLink.Domain.Enums;
 using LastLink.Domain.Errors;
 using LastLink.Domain.Models.Dtos;
 using LastLink.Domain.Models.Requests;
+using LastLink.Domain.Utils;
 
 namespace LastLink.Application.Services
 {
     public class AnticipationService : IAnticipationService
     {
+        private const decimal MIN_VALUE = 100m;
         private const decimal TAX_RATE = 0.05m;
         private readonly IAnticipationRepository _repo;
 
@@ -20,22 +22,13 @@ namespace LastLink.Application.Services
 
         public async Task<Result<AnticipationDto>> CreateAsync(CreateAnticipationRequest request)
         {
-            if (request.ValorSolicitado <= 100m)
+            if (request.ValorSolicitado <= MIN_VALUE)
                 return Result.Fail(ErrorMessages.VALOR_SOLICITADO_INVALIDO);
 
             if (await _repo.HasPendingForCreatorAsync(request.CreatorId))
                 return Result.Fail(ErrorMessages.CREATOR_COM_SOLICITACAO_PENDENTE);
 
-            var anticipationDto = new AnticipationDto
-            {
-                CreatorId = request.CreatorId,
-                ValorSolicitado = request.ValorSolicitado,
-                ValorLiquido = CalculateValorLiquido(request.ValorSolicitado),
-                DataSolicitacao = DateTime.Now,
-                Status = AntecipationStatusEnum.Pendente
-            };
-
-            var resultAdd = await _repo.AddAsync(anticipationDto);
+            var resultAdd = await _repo.AddAsync(request);
 
             if (resultAdd == null)
                 return Result.Fail(ErrorMessages.ERRO_AO_CRIAR_SOLICITACAO);
@@ -55,42 +48,34 @@ namespace LastLink.Application.Services
 
         public Result<AnticipationDto> Simulate(decimal valorSolicitado, string creatorId)
         {
-            if (valorSolicitado <= 100m)
+            if (valorSolicitado <= MIN_VALUE)
                 return Result.Fail(ErrorMessages.VALOR_SOLICITADO_INVALIDO);
 
-            return new AnticipationDto
-            {
-                Id = Guid.Empty,
-                CreatorId = creatorId,
-                ValorSolicitado = valorSolicitado,
-                ValorLiquido = CalculateValorLiquido(valorSolicitado),
-                DataSolicitacao = DateTime.Now,
-                Status = AntecipationStatusEnum.Simulação
-            };
+            return new AnticipationDto(Guid.Empty, creatorId, valorSolicitado, Utils.CalculateValorLiquido(valorSolicitado, TAX_RATE), AnticipationStatusEnum.Simulação);
         }
 
-        public async Task<Result<AnticipationDto>> UpdateStatusAsync(Guid id, AntecipationStatusEnum newStatus)
+        public async Task<Result<AnticipationDto>> UpdateStatusAsync(Guid id, AnticipationStatusEnum newStatus)
         {
-            var allowedStatuses = new HashSet<AntecipationStatusEnum>
+            var allowedStatuses = new HashSet<AnticipationStatusEnum>
             {
-                AntecipationStatusEnum.Aprovada,
-                AntecipationStatusEnum.Recusada
+                AnticipationStatusEnum.Aprovada,
+                AnticipationStatusEnum.Recusada
             };
 
             if (!allowedStatuses.Contains(newStatus))
-                return Result.Fail(ErrorMessages.VALOR_SOLICITADO_INVALIDO);
+                return Result.Fail(ErrorMessages.STATUS_INVALIDO);
 
             var entity = await _repo.GetByIdAsync(id);
             if (entity == null)
-                return Result.Fail(ErrorMessages.CREATOR_SEM_SOLICITACOES);
+                return Result.Fail(ErrorMessages.SOLICITACAO_NAO_ENCONTRADA);
+
+            if (entity.Status != AnticipationStatusEnum.Pendente)
+                return Result.Fail(ErrorMessages.SOLICITACAO_FINALIZADA);
 
             entity.Status = newStatus;
             await _repo.SaveChangesAsync();
 
             return Result.Ok(entity);
         }
-
-        private static decimal CalculateValorLiquido(decimal bruto)
-            => Math.Round(bruto * (1 - TAX_RATE), 2, MidpointRounding.AwayFromZero);
     }
 }

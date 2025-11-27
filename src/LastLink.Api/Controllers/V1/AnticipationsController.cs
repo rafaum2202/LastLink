@@ -49,29 +49,13 @@ namespace LastLink.Api.Controllers.V1
         }
 
         [HttpPatch("{id}/status")]
-        public async Task<IActionResult> UpdateStatus(Guid id, [FromQuery] AntecipationStatusEnum status)
+        public async Task<IActionResult> UpdateStatus(Guid id, [FromQuery] AnticipationStatusEnum status)
         {
-            try
-            {
-                var updated = await _service.UpdateStatusAsync(id, status);
-                return Ok(updated);
-            }
-            catch (KeyNotFoundException)
-            {
-                return NotFound();
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { error = ex.Message });
-            }
-        }
+            var result = await _service.UpdateStatusAsync(id, status);
+            if (!result.IsSuccess)
+                return GetResultByErrorMessage(result.Errors);
 
-        //[HttpGet("{id}")]
-        //public async Task<IActionResult> GetById(Guid id)
-        //{
-        //    // small helper for CreatedAtAction
-        //    var list = await _service.ListByCreatorAsync(""); // not ideal but used only for CreatedAtAction signature
-        //    return NotFound();
-        //}
+            return Ok(result.Value);
+        }
     }
 }

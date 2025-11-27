@@ -10,6 +10,6 @@ namespace LastLink.Domain.Contracts.Services
         Task<Result<AnticipationDto>> CreateAsync(CreateAnticipationRequest request);
         Task<Result<IEnumerable<AnticipationDto>>> ListByCreatorAsync(string creatorId);
         Result<AnticipationDto> Simulate(decimal valorSolicitado, string creatorId);
-        Task<Result<AnticipationDto>> UpdateStatusAsync(Guid id, AntecipationStatusEnum newStatus);
+        Task<Result<AnticipationDto>> UpdateStatusAsync(Guid id, AnticipationStatusEnum newStatus);
     }
 }
