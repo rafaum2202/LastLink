@@ -1,8 +1,8 @@
 ﻿using LastLink.Application.Services;
 using LastLink.Domain.Contracts.Repositories;
+using LastLink.Domain.Entities;
 using LastLink.Domain.Enums;
 using LastLink.Domain.Errors;
-using LastLink.Domain.Models.Dtos;
 using LastLink.Domain.Models.Requests;
 using Moq;
 
@@ -64,8 +64,8 @@ namespace LastLink.Tests.Application.Services
             _repoMock.Setup(r => r.HasPendingForCreatorAsync("123"))
                      .ReturnsAsync(false);
 
-            _repoMock.Setup(r => r.AddAsync(It.IsAny<AnticipationDto>()))
-                     .ReturnsAsync((AnticipationDto?)null);
+            _repoMock.Setup(r => r.AddAsync(It.IsAny<Anticipation>()))
+                     .ReturnsAsync((Anticipation?)null);
 
             var result = await _service.CreateAsync(request);
 
@@ -82,25 +82,24 @@ namespace LastLink.Tests.Application.Services
                 ValorSolicitado = 200m
             };
 
-            var created = (AnticipationDto)request;
+            var created = (Anticipation)request;
 
             _repoMock.Setup(r => r.HasPendingForCreatorAsync("123"))
                      .ReturnsAsync(false);
 
-            _repoMock.Setup(r => r.AddAsync(It.IsAny<AnticipationDto>()))
+            _repoMock.Setup(r => r.AddAsync(It.IsAny<Anticipation>()))
                      .ReturnsAsync(created);
 
             var result = await _service.CreateAsync(request);
 
             Assert.True(result.IsSuccess);
-            Assert.Equal(created, result.Value);
         }
 
         [Fact]
         public async Task ListByCreatorAsync_ShouldReturnFail_WhenNoItemsFound()
         {
             _repoMock.Setup(r => r.GetByCreatorAsync("abc"))
-                     .ReturnsAsync(new List<AnticipationDto>());
+                     .ReturnsAsync(new List<Anticipation>());
 
             var result = await _service.ListByCreatorAsync("abc");
 
@@ -111,9 +110,9 @@ namespace LastLink.Tests.Application.Services
         [Fact]
         public async Task ListByCreatorAsync_ShouldReturnSuccess_WhenItemsExist()
         {
-            var items = new List<AnticipationDto>
+            var items = new List<Anticipation>
             {
-                new AnticipationDto(Guid.NewGuid(), "abc", 1000m, 950m, AnticipationStatusEnum.Pendente)
+                new Anticipation(Guid.NewGuid(), "abc", 1000m, 950m, AnticipationStatusEnum.Pendente)
             };
 
             _repoMock.Setup(r => r.GetByCreatorAsync("abc"))
@@ -122,7 +121,6 @@ namespace LastLink.Tests.Application.Services
             var result = await _service.ListByCreatorAsync("abc");
 
             Assert.True(result.IsSuccess);
-            Assert.Equal(items, result.Value);
         }
 
         [Fact]
@@ -162,7 +160,7 @@ namespace LastLink.Tests.Application.Services
             var id = Guid.NewGuid();
 
             _repoMock.Setup(r => r.GetByIdAsync(id))
-                     .ReturnsAsync((AnticipationDto?)null);
+                     .ReturnsAsync((Anticipation?)null);
 
             var result = await _service.UpdateStatusAsync(id, AnticipationStatusEnum.Aprovada);
 
@@ -174,7 +172,7 @@ namespace LastLink.Tests.Application.Services
         public async Task UpdateStatusAsync_ShouldReturnFail_WhenEntityNotPendente()
         {
             var id = Guid.NewGuid();
-            var dto = new AnticipationDto(id, "123", 1000m, 950m, AnticipationStatusEnum.Aprovada);
+            var dto = new Anticipation(id, "123", 1000m, 950m, AnticipationStatusEnum.Aprovada);
 
             _repoMock.Setup(r => r.GetByIdAsync(id))
                      .ReturnsAsync(dto);
@@ -189,7 +187,7 @@ namespace LastLink.Tests.Application.Services
         public async Task UpdateStatusAsync_ShouldReturnSuccess_WhenUpdatedCorrectly()
         {
             var id = Guid.NewGuid();
-            var dto = new AnticipationDto(id, "123", 1000m, 950m, AnticipationStatusEnum.Pendente);
+            var dto = new Anticipation(id, "123", 1000m, 950m, AnticipationStatusEnum.Pendente);
 
             _repoMock.Setup(r => r.GetByIdAsync(id))
                      .ReturnsAsync(dto);

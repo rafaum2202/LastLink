@@ -1,5 +1,5 @@
-﻿using LastLink.Domain.Enums;
-using LastLink.Domain.Models.Dtos;
+﻿using LastLink.Domain.Entities;
+using LastLink.Domain.Enums;
 using LastLink.Infra.Data;
 using LastLink.Infra.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -23,7 +23,7 @@ namespace LastLink.Tests.Infra.Repositories
             var db = CreateDbContext();
             var repo = new AnticipationRepository(db);
 
-            var dto = new AnticipationDto(Guid.NewGuid(), "abc", 200, 190, AnticipationStatusEnum.Pendente);
+            var dto = new Anticipation(Guid.NewGuid(), "abc", 200, 190, AnticipationStatusEnum.Pendente);
 
             var result = await repo.AddAsync(dto);
 
@@ -38,7 +38,7 @@ namespace LastLink.Tests.Infra.Repositories
             var db = CreateDbContext();
             var repo = new AnticipationRepository(db);
 
-            var dto = new AnticipationDto(Guid.NewGuid(), "abc", 200, 190, AnticipationStatusEnum.Pendente);
+            var dto = new Anticipation(Guid.NewGuid(), "abc", 200, 190, AnticipationStatusEnum.Pendente);
             db.AnticipationRequests.Add(dto);
             await db.SaveChangesAsync();
 
@@ -66,9 +66,9 @@ namespace LastLink.Tests.Infra.Repositories
             var repo = new AnticipationRepository(db);
 
             db.AnticipationRequests.AddRange(
-                new AnticipationDto(Guid.NewGuid(), "creator1", 200, 190, AnticipationStatusEnum.Pendente),
-                new AnticipationDto(Guid.NewGuid(), "creator1", 300, 285, AnticipationStatusEnum.Aprovada),
-                new AnticipationDto(Guid.NewGuid(), "creator2", 1000, 950, AnticipationStatusEnum.Pendente)
+                new Anticipation(Guid.NewGuid(), "creator1", 200, 190, AnticipationStatusEnum.Pendente),
+                new Anticipation(Guid.NewGuid(), "creator1", 300, 285, AnticipationStatusEnum.Aprovada),
+                new Anticipation(Guid.NewGuid(), "creator2", 1000, 950, AnticipationStatusEnum.Pendente)
             );
 
             await db.SaveChangesAsync();
@@ -97,7 +97,7 @@ namespace LastLink.Tests.Infra.Repositories
             var repo = new AnticipationRepository(db);
 
             db.AnticipationRequests.Add(
-                new AnticipationDto(Guid.NewGuid(), "creator1", 200, 190, AnticipationStatusEnum.Pendente)
+                new Anticipation(Guid.NewGuid(), "creator1", 200, 190, AnticipationStatusEnum.Pendente)
             );
 
             await db.SaveChangesAsync();
@@ -114,7 +114,7 @@ namespace LastLink.Tests.Infra.Repositories
             var repo = new AnticipationRepository(db);
 
             db.AnticipationRequests.Add(
-                new AnticipationDto(Guid.NewGuid(), "creator1", 200, 190, AnticipationStatusEnum.Aprovada)
+                new Anticipation(Guid.NewGuid(), "creator1", 200, 190, AnticipationStatusEnum.Aprovada)
             );
 
             await db.SaveChangesAsync();
@@ -141,7 +141,7 @@ namespace LastLink.Tests.Infra.Repositories
             var db = CreateDbContext();
             var repo = new AnticipationRepository(db);
 
-            var dto = new AnticipationDto(Guid.NewGuid(), "x", 100, 95, AnticipationStatusEnum.Pendente);
+            var dto = new Anticipation(Guid.NewGuid(), "x", 100, 95, AnticipationStatusEnum.Pendente);
 
             db.AnticipationRequests.Add(dto);
 

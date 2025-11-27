@@ -3,10 +3,9 @@ using LastLink.Domain.Contracts.Repositories;
 using LastLink.Domain.Contracts.Services;
 using LastLink.Domain.Enums;
 using LastLink.Domain.Errors;
-using LastLink.Domain.Models.Dtos;
 using LastLink.Domain.Models.Requests;
+using LastLink.Domain.Models.Responses;
 using LastLink.Domain.Utils;
-using System;
 
 namespace LastLink.Application.Services
 {
@@ -21,7 +20,7 @@ namespace LastLink.Application.Services
             _repo = repo;
         }
 
-        public async Task<Result<AnticipationDto>> CreateAsync(CreateAnticipationRequest request)
+        public async Task<Result<AnticipationResponse>> CreateAsync(CreateAnticipationRequest request)
         {
             if (request.ValorSolicitado <= MIN_VALUE)
                 return Result.Fail(ErrorMessages.VALOR_SOLICITADO_INVALIDO);
@@ -34,28 +33,30 @@ namespace LastLink.Application.Services
             if (resultAdd == null)
                 return Result.Fail(ErrorMessages.ERRO_AO_CRIAR_SOLICITACAO);
 
-            return Result.Ok(resultAdd);
+            return Result.Ok((AnticipationResponse)resultAdd);
         }
 
-        public async Task<Result<IEnumerable<AnticipationDto>>> ListByCreatorAsync(string creatorId)
+        public async Task<Result<List<AnticipationResponse>>> ListByCreatorAsync(string creatorId)
         {
             var items = await _repo.GetByCreatorAsync(creatorId);
 
             if (items == null || !items.Any())
                 return Result.Fail(ErrorMessages.CREATOR_SEM_SOLICITACOES);
 
-            return Result.Ok(items);
+            var response = items.Select(i => (AnticipationResponse)i).ToList();
+
+            return Result.Ok(response);
         }
 
-        public Result<AnticipationDto> Simulate(string creatorId, decimal valorSolicitado)
+        public Result<AnticipationResponse> Simulate(string creatorId, decimal valorSolicitado)
         {
             if (valorSolicitado <= MIN_VALUE)
                 return Result.Fail(ErrorMessages.VALOR_SOLICITADO_INVALIDO);
 
-            return new AnticipationDto(Guid.Empty, creatorId, valorSolicitado, Utils.CalculateValorLiquido(valorSolicitado, TAX_RATE), AnticipationStatusEnum.Simulação);
+            return new AnticipationResponse(Guid.Empty, creatorId, valorSolicitado, Utils.CalculateValorLiquido(valorSolicitado, TAX_RATE), AnticipationStatusEnum.Simulação);
         }
 
-        public async Task<Result<AnticipationDto>> UpdateStatusAsync(Guid id, AnticipationStatusEnum newStatus)
+        public async Task<Result<AnticipationResponse>> UpdateStatusAsync(Guid id, AnticipationStatusEnum newStatus)
         {
             var allowedStatuses = new HashSet<AnticipationStatusEnum>
             {
@@ -76,7 +77,7 @@ namespace LastLink.Application.Services
             entity.Status = newStatus;
             await _repo.SaveChangesAsync();
 
-            return Result.Ok(entity);
+            return Result.Ok((AnticipationResponse)entity);
         }
     }
 }

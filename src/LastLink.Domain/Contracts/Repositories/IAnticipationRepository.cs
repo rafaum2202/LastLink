@@ -1,12 +1,13 @@
-﻿using LastLink.Domain.Models.Dtos;
+﻿using LastLink.Domain.Entities;
+using LastLink.Domain.Models.Responses;
 
 namespace LastLink.Domain.Contracts.Repositories
 {
     public interface IAnticipationRepository
     {
-        Task<AnticipationDto> AddAsync(AnticipationDto request);
-        Task<IEnumerable<AnticipationDto>> GetByCreatorAsync(string creatorId);
-        Task<AnticipationDto?> GetByIdAsync(Guid id);
+        Task<Anticipation> AddAsync(Anticipation request);
+        Task<IEnumerable<Anticipation>> GetByCreatorAsync(string creatorId);
+        Task<Anticipation?> GetByIdAsync(Guid id);
         Task SaveChangesAsync();
         Task<bool> HasPendingForCreatorAsync(string creatorId);
     }

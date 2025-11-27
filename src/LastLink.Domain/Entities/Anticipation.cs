@@ -1,8 +1,8 @@
 ﻿using LastLink.Domain.Enums;
 
-namespace LastLink.Domain.Models.Dtos
+namespace LastLink.Domain.Entities
 {
-    public class AnticipationDto
+    public class Anticipation
     {
         public Guid Id { get; set; }
         public string CreatorId { get; set; } = null!;
@@ -11,7 +11,7 @@ namespace LastLink.Domain.Models.Dtos
         public AnticipationStatusEnum Status { get; set; }
         public DateTime DataSolicitacao { get; set; }
 
-        public AnticipationDto(Guid id, string creatorId, decimal valorSolicitado, decimal valorLiquido, AnticipationStatusEnum status)
+        public Anticipation(Guid id, string creatorId, decimal valorSolicitado, decimal valorLiquido, AnticipationStatusEnum status)
         {
             Id = id;
             CreatorId = creatorId;

@@ -3,8 +3,8 @@ using LastLink.Api.Controllers.V1;
 using LastLink.Domain.Contracts.Services;
 using LastLink.Domain.Enums;
 using LastLink.Domain.Errors;
-using LastLink.Domain.Models.Dtos;
 using LastLink.Domain.Models.Requests;
+using LastLink.Domain.Models.Responses;
 using LastLink.Domain.Utils;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
@@ -32,10 +32,10 @@ namespace LastLink.Tests.Api
                 ValorSolicitado = 200m
             };
 
-            var dto = new AnticipationDto(Guid.NewGuid(), "123", 200m, Utils.CalculateValorLiquido(200m, TAX_RATE), AnticipationStatusEnum.Pendente);
+            var response = new AnticipationResponse(Guid.NewGuid(), "123", 200m, Utils.CalculateValorLiquido(200m, TAX_RATE), AnticipationStatusEnum.Pendente);
 
             _serviceMock.Setup(s => s.CreateAsync(It.IsAny<CreateAnticipationRequest>()))
-                        .ReturnsAsync(Result.Ok(dto));
+                        .ReturnsAsync(Result.Ok(response));
 
             var result = await _controller.Create(request);
 
@@ -64,13 +64,13 @@ namespace LastLink.Tests.Api
         {
             var creatorId = "123";
 
-            var list = new List<AnticipationDto>
+            var list = new List<AnticipationResponse>
             {
-                new AnticipationDto(Guid.NewGuid(), creatorId, 200m, 190m, AnticipationStatusEnum.Pendente)
+                new AnticipationResponse(Guid.NewGuid(), creatorId, 200m, 190m, AnticipationStatusEnum.Pendente)
             };
 
             _serviceMock.Setup(s => s.ListByCreatorAsync(It.IsAny<string>()))
-                        .ReturnsAsync(Result.Ok<IEnumerable<AnticipationDto>>(list));
+                        .ReturnsAsync(Result.Ok(list));
 
             var result = await _controller.ListByCreator(creatorId);
 
@@ -81,7 +81,7 @@ namespace LastLink.Tests.Api
         public async Task ListByCreatorAsync_ShouldReturnNotFound_WhenFail()
         {
             _serviceMock.Setup(s => s.ListByCreatorAsync(It.IsAny<string>()))
-                        .ReturnsAsync(Result.Fail<IEnumerable<AnticipationDto>>(ErrorMessages.CREATOR_SEM_SOLICITACOES));
+                        .ReturnsAsync(Result.Fail<List<AnticipationResponse>>(ErrorMessages.CREATOR_SEM_SOLICITACOES));
 
             var result = await _controller.ListByCreator("123");
 
@@ -94,17 +94,17 @@ namespace LastLink.Tests.Api
             var creatorId = "123";
             var valor = 200m;
 
-            var dto = new AnticipationDto(Guid.Empty, creatorId, valor, 190m, AnticipationStatusEnum.Simulação);
+            var response = new AnticipationResponse(Guid.Empty, creatorId, valor, 190m, AnticipationStatusEnum.Simulação);
 
             _serviceMock.Setup(s => s.Simulate(It.IsAny<string>(), It.IsAny<decimal>()))
-                        .Returns(Result.Ok(dto));
+                        .Returns(Result.Ok(response));
 
             var result = _controller.Simulate(creatorId, valor);
 
             var created = Assert.IsType<CreatedResult>(result);
-            var returnedDto = Assert.IsType<AnticipationDto>(created.Value);
+            var returnedResponse = Assert.IsType<AnticipationResponse>(created.Value);
 
-            Assert.Equal(dto.CreatorId, returnedDto.CreatorId);
+            Assert.Equal(response.CreatorId, returnedResponse.CreatorId);
             Assert.Equal(201, created.StatusCode);
         }
 
@@ -115,7 +115,7 @@ namespace LastLink.Tests.Api
             var valor = 50m;
 
             _serviceMock.Setup(s => s.Simulate(It.IsAny<string>(), It.IsAny<decimal>()))
-                        .Returns(Result.Fail<AnticipationDto>(ErrorMessages.VALOR_SOLICITADO_INVALIDO));
+                        .Returns(Result.Fail<AnticipationResponse>(ErrorMessages.VALOR_SOLICITADO_INVALIDO));
 
             var result = _controller.Simulate(creatorId, valor);
 
@@ -128,22 +128,22 @@ namespace LastLink.Tests.Api
             var id = Guid.NewGuid();
             var status = AnticipationStatusEnum.Aprovada;
 
-            var dto = new AnticipationDto(id, "123", 1000m, 950m, status);
+            var response = new AnticipationResponse(id, "123", 1000m, 950m, status);
 
             _serviceMock.Setup(s => s.UpdateStatusAsync(id, status))
-                        .ReturnsAsync(Result.Ok(dto));
+                        .ReturnsAsync(Result.Ok(response));
 
             var result = await _controller.UpdateStatus(id, status);
 
             var ok = Assert.IsType<OkObjectResult>(result);
-            Assert.Equal(dto, ok.Value);
+            Assert.Equal(response, ok.Value);
         }
 
         [Fact]
         public async Task UpdateStatusAsync_ShouldReturnBadRequest_WhenFail()
         {
             _serviceMock.Setup(s => s.UpdateStatusAsync(It.IsAny<Guid>(), It.IsAny<AnticipationStatusEnum>()))
-                        .ReturnsAsync(Result.Fail<AnticipationDto>(ErrorMessages.STATUS_INVALIDO));
+                        .ReturnsAsync(Result.Fail<AnticipationResponse>(ErrorMessages.STATUS_INVALIDO));
 
             var result = await _controller.UpdateStatus(Guid.NewGuid(), AnticipationStatusEnum.Recusada);
 
