@@ -11,6 +11,7 @@ namespace LastLink.Domain.Models.Responses
         public decimal ValorLiquido { get; set; }
         public AnticipationStatusEnum Status { get; set; }
         public DateTime DataSolicitacao { get; set; }
+
         public AnticipationResponse()
         {
         }
@@ -34,8 +35,5 @@ namespace LastLink.Domain.Models.Responses
             Status = a.Status,
             DataSolicitacao = a.DataSolicitacao
         };
-
-
-
     }
 }

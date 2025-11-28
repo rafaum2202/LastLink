@@ -5,7 +5,9 @@ namespace LastLink.Infra.Data
 {
     public class LastLinkDbContext : DbContext
     {
-        public LastLinkDbContext(DbContextOptions<LastLinkDbContext> options) : base(options) { }
+        public LastLinkDbContext(DbContextOptions<LastLinkDbContext> options) : base(options)
+        {
+        }
 
         public DbSet<Anticipation> AnticipationRequests { get; set; } = null!;
 

@@ -52,7 +52,7 @@ namespace LastLink.Tests.Api
             };
 
             _serviceMock.Setup(s => s.CreateAsync(It.IsAny<CreateAnticipationRequest>()))
-                        .ReturnsAsync(Result.Fail(ErrorMessages.VALOR_SOLICITADO_INVALIDO));
+                        .ReturnsAsync(Result.Fail(ErrorMessages.CREATOR_COM_SOLICITACAO_PENDENTE));
 
             var result = await _controller.Create(request);
 
@@ -94,18 +94,16 @@ namespace LastLink.Tests.Api
             var creatorId = "123";
             var valor = 200m;
 
+            var request = new SimulateRequest();
             var response = new AnticipationResponse(Guid.Empty, creatorId, valor, 190m, AnticipationStatusEnum.Simulação);
 
-            _serviceMock.Setup(s => s.Simulate(It.IsAny<string>(), It.IsAny<decimal>()))
+            _serviceMock.Setup(s => s.Simulate(It.IsAny<SimulateRequest>()))
                         .Returns(Result.Ok(response));
 
-            var result = _controller.Simulate(creatorId, valor);
+            var result = _controller.Simulate(request);
 
-            var created = Assert.IsType<CreatedResult>(result);
-            var returnedResponse = Assert.IsType<AnticipationResponse>(created.Value);
-
-            Assert.Equal(response.CreatorId, returnedResponse.CreatorId);
-            Assert.Equal(201, created.StatusCode);
+            var ok = Assert.IsType<OkObjectResult>(result);
+            Assert.Equal(response, ok.Value);
         }
 
         [Fact]
@@ -114,10 +112,13 @@ namespace LastLink.Tests.Api
             var creatorId = "123";
             var valor = 50m;
 
-            _serviceMock.Setup(s => s.Simulate(It.IsAny<string>(), It.IsAny<decimal>()))
-                        .Returns(Result.Fail<AnticipationResponse>(ErrorMessages.VALOR_SOLICITADO_INVALIDO));
+            var request = new SimulateRequest();
+            var response = new AnticipationResponse(Guid.Empty, creatorId, valor, 190m, AnticipationStatusEnum.Simulação);
 
-            var result = _controller.Simulate(creatorId, valor);
+            _serviceMock.Setup(s => s.Simulate(It.IsAny<SimulateRequest>()))
+                        .Returns(Result.Fail<AnticipationResponse>(ErrorMessages.ERRO_AO_CRIAR_SOLICITACAO));
+
+            var result = _controller.Simulate(request);
 
             Assert.IsType<BadRequestObjectResult>(result);
         }
@@ -126,14 +127,14 @@ namespace LastLink.Tests.Api
         public async Task UpdateStatusAsync_ShouldReturnOk_WhenSuccess()
         {
             var id = Guid.NewGuid();
-            var status = AnticipationStatusEnum.Aprovada;
+            var request = new UpdateStatusRequest();
 
-            var response = new AnticipationResponse(id, "123", 1000m, 950m, status);
+            var response = new AnticipationResponse(id, "123", 1000m, 950m, AnticipationStatusEnum.Aprovada);
 
-            _serviceMock.Setup(s => s.UpdateStatusAsync(id, status))
+            _serviceMock.Setup(s => s.UpdateStatusAsync(It.IsAny<Guid>(), It.IsAny<UpdateStatusRequest>()))
                         .ReturnsAsync(Result.Ok(response));
 
-            var result = await _controller.UpdateStatus(id, status);
+            var result = await _controller.UpdateStatus(id, request);
 
             var ok = Assert.IsType<OkObjectResult>(result);
             Assert.Equal(response, ok.Value);
@@ -142,10 +143,11 @@ namespace LastLink.Tests.Api
         [Fact]
         public async Task UpdateStatusAsync_ShouldReturnBadRequest_WhenFail()
         {
-            _serviceMock.Setup(s => s.UpdateStatusAsync(It.IsAny<Guid>(), It.IsAny<AnticipationStatusEnum>()))
-                        .ReturnsAsync(Result.Fail<AnticipationResponse>(ErrorMessages.STATUS_INVALIDO));
+            var request = new UpdateStatusRequest();
+            _serviceMock.Setup(s => s.UpdateStatusAsync(It.IsAny<Guid>(), It.IsAny<UpdateStatusRequest>()))
+                        .ReturnsAsync(Result.Fail<AnticipationResponse>(ErrorMessages.SOLICITACAO_FINALIZADA));
 
-            var result = await _controller.UpdateStatus(Guid.NewGuid(), AnticipationStatusEnum.Recusada);
+            var result = await _controller.UpdateStatus(Guid.NewGuid(), request);
 
             Assert.IsType<BadRequestObjectResult>(result);
         }

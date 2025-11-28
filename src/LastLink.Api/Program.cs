@@ -1,5 +1,9 @@
 using Asp.Versioning.ApiExplorer;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using LastLink.Api.Extensions;
+using LastLink.Api.Middlewares;
+using LastLink.Domain.Configurations;
 using LastLink.Infra.Extensions;
 using System.Text.Json.Serialization;
 
@@ -21,8 +25,14 @@ namespace LastLink.Api
                     opt.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
                 });
 
-            var app = builder.Build();
+            builder.Services.Configure<RulesConfig>(builder.Configuration.GetSection("RulesConfig"));
 
+            builder.Services.AddFluentValidationAutoValidation();
+            builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+
+            builder.Services.AddHttpContextAccessor();
+
+            var app = builder.Build();
 
             var provider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
 
@@ -38,6 +48,8 @@ namespace LastLink.Api
             });
 
             app.UseHttpsRedirection();
+
+            app.UseMiddleware<CorrelationLoggingMiddleware>();
 
             app.MapControllers();
 

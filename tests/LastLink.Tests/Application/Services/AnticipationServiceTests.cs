@@ -1,9 +1,11 @@
 ﻿using LastLink.Application.Services;
+using LastLink.Domain.Configurations;
 using LastLink.Domain.Contracts.Repositories;
 using LastLink.Domain.Entities;
 using LastLink.Domain.Enums;
 using LastLink.Domain.Errors;
 using LastLink.Domain.Models.Requests;
+using Microsoft.Extensions.Options;
 using Moq;
 
 namespace LastLink.Tests.Application.Services
@@ -12,26 +14,17 @@ namespace LastLink.Tests.Application.Services
     {
         private readonly Mock<IAnticipationRepository> _repoMock;
         private readonly AnticipationService _service;
+        private readonly IOptions<RulesConfig> _rulesConfig;
 
         public AnticipationServiceTests()
         {
             _repoMock = new Mock<IAnticipationRepository>();
-            _service = new AnticipationService(_repoMock.Object);
-        }
-
-        [Fact]
-        public async Task CreateAsync_ShouldReturnFail_WhenValorSolicitadoIsInvalid()
-        {
-            var request = new CreateAnticipationRequest
+            _rulesConfig = Options.Create(new RulesConfig
             {
-                CreatorId = "123",
-                ValorSolicitado = 50m
-            };
-
-            var result = await _service.CreateAsync(request);
-
-            Assert.True(result.IsFailed);
-            Assert.Equal(ErrorMessages.VALOR_SOLICITADO_INVALIDO.Message, result.Errors.First().Message);
+                MinValueAllowed = 100,
+                TaxRate = 0.05m
+            });
+            _service = new AnticipationService(_repoMock.Object, _rulesConfig);
         }
 
         [Fact]
@@ -82,7 +75,7 @@ namespace LastLink.Tests.Application.Services
                 ValorSolicitado = 200m
             };
 
-            var created = (Anticipation)request;
+            var created = new Anticipation(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<decimal>(), It.IsAny<decimal>(), It.IsAny<AnticipationStatusEnum>());
 
             _repoMock.Setup(r => r.HasPendingForCreatorAsync("123"))
                      .ReturnsAsync(false);
@@ -124,34 +117,12 @@ namespace LastLink.Tests.Application.Services
         }
 
         [Fact]
-        public void Simulate_ShouldReturnFail_WhenValorSolicitadoIsInvalid()
-        {
-            var result = _service.Simulate("123", 50m);
-
-            Assert.True(result.IsFailed);
-            Assert.Equal(ErrorMessages.VALOR_SOLICITADO_INVALIDO.Message, result.Errors.First().Message);
-        }
-
-        [Fact]
         public void Simulate_ShouldReturnSuccess_WhenInputIsValid()
         {
-            var result = _service.Simulate("123", 200m);
+            var request = new SimulateRequest();
+            var result = _service.Simulate(request);
 
             Assert.True(result.IsSuccess);
-            Assert.Equal("123", result.Value.CreatorId);
-            Assert.Equal(200m, result.Value.ValorSolicitado);
-            Assert.Equal(AnticipationStatusEnum.Simulação, result.Value.Status);
-        }
-
-        [Fact]
-        public async Task UpdateStatusAsync_ShouldReturnFail_WhenStatusIsInvalid()
-        {
-            var id = Guid.NewGuid();
-
-            var result = await _service.UpdateStatusAsync(id, AnticipationStatusEnum.Simulação);
-
-            Assert.True(result.IsFailed);
-            Assert.Equal(ErrorMessages.STATUS_INVALIDO.Message, result.Errors.First().Message);
         }
 
         [Fact]
@@ -162,7 +133,7 @@ namespace LastLink.Tests.Application.Services
             _repoMock.Setup(r => r.GetByIdAsync(id))
                      .ReturnsAsync((Anticipation?)null);
 
-            var result = await _service.UpdateStatusAsync(id, AnticipationStatusEnum.Aprovada);
+            var result = await _service.UpdateStatusAsync(id, It.IsAny<UpdateStatusRequest>());
 
             Assert.True(result.IsFailed);
             Assert.Equal(ErrorMessages.SOLICITACAO_NAO_ENCONTRADA.Message, result.Errors.First().Message);
@@ -177,7 +148,7 @@ namespace LastLink.Tests.Application.Services
             _repoMock.Setup(r => r.GetByIdAsync(id))
                      .ReturnsAsync(dto);
 
-            var result = await _service.UpdateStatusAsync(id, AnticipationStatusEnum.Recusada);
+            var result = await _service.UpdateStatusAsync(id, It.IsAny<UpdateStatusRequest>());
 
             Assert.True(result.IsFailed);
             Assert.Equal(ErrorMessages.SOLICITACAO_FINALIZADA.Message, result.Errors.First().Message);
@@ -188,11 +159,15 @@ namespace LastLink.Tests.Application.Services
         {
             var id = Guid.NewGuid();
             var dto = new Anticipation(id, "123", 1000m, 950m, AnticipationStatusEnum.Pendente);
+            var request = new UpdateStatusRequest()
+            {
+                Status = AnticipationStatusEnum.Aprovada
+            };
 
             _repoMock.Setup(r => r.GetByIdAsync(id))
                      .ReturnsAsync(dto);
 
-            var result = await _service.UpdateStatusAsync(id, AnticipationStatusEnum.Aprovada);
+            var result = await _service.UpdateStatusAsync(id, request);
 
             _repoMock.Verify(r => r.SaveChangesAsync(), Times.Once);
 

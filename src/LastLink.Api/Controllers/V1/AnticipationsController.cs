@@ -1,6 +1,5 @@
 ﻿using Asp.Versioning;
 using LastLink.Domain.Contracts.Services;
-using LastLink.Domain.Enums;
 using LastLink.Domain.Models.Requests;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,9 +18,9 @@ namespace LastLink.Api.Controllers.V1
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateAnticipationRequest dto)
+        public async Task<IActionResult> Create([FromBody] CreateAnticipationRequest request)
         {
-            var result = await _service.CreateAsync(dto);
+            var result = await _service.CreateAsync(request);
             if (!result.IsSuccess)
                 return GetResultByErrorMessage(result.Errors);
 
@@ -39,19 +38,22 @@ namespace LastLink.Api.Controllers.V1
         }
 
         [HttpGet("simulate")]
-        public IActionResult Simulate([FromQuery] string creatorId, [FromQuery] decimal valorSolicitado)
+        public IActionResult Simulate([FromQuery] SimulateRequest request)
         {
-            var result = _service.Simulate(creatorId, valorSolicitado);
+            var result = _service.Simulate(request);
             if (!result.IsSuccess)
                 return GetResultByErrorMessage(result.Errors);
 
-            return Created(string.Empty, result.Value);
+            return Ok(result.Value);
         }
 
         [HttpPatch("{id}/status")]
-        public async Task<IActionResult> UpdateStatus(Guid id, [FromQuery] AnticipationStatusEnum status)
+        public async Task<IActionResult> UpdateStatus([FromRoute] Guid id, [FromQuery] UpdateStatusRequest request)
         {
-            var result = await _service.UpdateStatusAsync(id, status);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var result = await _service.UpdateStatusAsync(id, request);
             if (!result.IsSuccess)
                 return GetResultByErrorMessage(result.Errors);
 
