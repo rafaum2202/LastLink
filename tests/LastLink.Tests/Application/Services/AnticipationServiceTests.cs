@@ -57,9 +57,6 @@ namespace LastLink.Tests.Application.Services
             _repoMock.Setup(r => r.HasPendingForCreatorAsync("123"))
                      .ReturnsAsync(false);
 
-            _repoMock.Setup(r => r.AddAsync(It.IsAny<Anticipation>()))
-                     .ReturnsAsync((Anticipation?)null);
-
             var result = await _service.CreateAsync(request);
 
             Assert.True(result.IsFailed);

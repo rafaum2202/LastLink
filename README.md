@@ -2,19 +2,23 @@
 API REST criada por Rafael Aguiar Rodrigues em .NET 8 utilizando arquitetura limpa (Domain → Application → Infrastructure → API), permitindo que Creators solicitem antecipações com cálculo automático de valor líquido, controle de status e versionamento de endpoints.
 
 ## 🚀 Executando o Projeto
-### 1. Clonar o repositório
-git clone https://github.com/rafaum2202/LastLink
+### 1. Abrir a pasta onde extraiu o arquivo .zip
 cd LastLink
 
 ### 2. Restaurar dependências
 dotnet restore
 
+### 3. Buildar a solução
+dotnet build
+
+
 ### 3. Rodar a API
-dotnet run --project LastLink.Api
+cd src/LastLink.API
+dotnet run
 
 A API iniciará em:
-https://localhost:7087/swagger
-http://localhost:5087/swagger
+https://localhost:7239/swagger
+http://localhost:5213/swagger
 
 ## 📘 Swagger + Versionamento
 Acesse via:
@@ -60,6 +64,8 @@ Cobrem:
 - EF Core InMemory  
 - xUnit  
 - Moq  
-- FluentResults  
-- Swagger  
+- FluentResults
+- FluentValidators
+- Swagger
+- Logs na camada de Middlewares com id de correlação
 

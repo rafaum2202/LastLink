@@ -27,6 +27,6 @@ namespace LastLink.Api.Configurations
             }
         }
 
-        public void Configure(string name, SwaggerGenOptions options) => Configure(options);
+        public void Configure(string? name, SwaggerGenOptions options) => Configure(options);
     }
 }
